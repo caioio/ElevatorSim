@@ -16,5 +16,24 @@ namespace ElevatorSim
         {
             InitializeComponent();
         }
+
+        private void DisplayMode()
+        {
+            if (cBMode.Checked)
+            {
+                tBmodeText.Text = "Modo automático";
+                tBmodeText.BackColor = Color.LimeGreen;
+            }
+            else
+            {
+                tBmodeText.Text = "Modo manual";
+                tBmodeText.BackColor = Color.Orange;
+            }
+        }
+
+        private void CheckedChangedEvent(object sender, EventArgs e)
+        {
+            DisplayMode();
+        }
     }
 }
