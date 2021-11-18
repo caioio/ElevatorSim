@@ -36,4 +36,14 @@ namespace ElevatorSim
             DisplayMode();
         }
     }
+
+    public partial class InterfaceElevador : Form
+    {
+        public int numeroDoBotao;
+
+        public void mudaCorDoBotao(object sender, EventArgs e)
+        {
+            // ainda será feito
+        }
+    }
 }
