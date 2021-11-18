@@ -25,8 +25,10 @@ namespace ElevatorSim
         private bool _isMoving;           // estado do elevador (movendo ou parado)
         private bool _isGoingUp;          // estado do elevador (subindo ou descendo)
         private uint _closerFloor;        // andar mais perto
+        private uint _floorRequested;     // andar requerido
         private bool[] _pannelRequests;   // lista de chamadas do painel do elevador (PRIORIDADE)
         private bool[] _floorRequests;    // lista de chamadas de cada andar
+        private long _timer;
 
         /*
          * O elevador prioriza as chamadas do painel, e sempre irá atender primeiro
@@ -88,6 +90,11 @@ namespace ElevatorSim
             get => _isMoving;
         }
 
+        private long GetTimeInMilliseconds()
+        {
+            return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+        }
+
         public ElevatorLogic(uint floorsNumber, double floorHeight, double slabHeight)
         {
             _floorsNumber = floorsNumber;
@@ -126,19 +133,104 @@ namespace ElevatorSim
 
         public void RunElevatorLogic(long millisecondsTickTime)
         {
-            if (_isMoving)
+
+            if((GetTimeInMilliseconds() - _timer) < 50)
             {
-                // checa se chegou ao andar
-                // se estiver partindo acelere até a velocidade máxima
-                // se estiver parando desacelere até 0 no andar requerido
+                return;
             }
             else
             {
-                // tem chamada no painel?
-                // tem chamada nos andares?
-                    // 
-                        // se sim move um pouco
-                        // caso não, continua parado
+                _timer = GetTimeInMilliseconds();
+            }
+
+            if (_isMoving)
+            {
+                if ((_position < (_floorRequested * (_floorHeight + _slabHeight)+0.1d)) && (_position > (_floorRequested * (_floorHeight + _slabHeight) - 0.1d)))
+                {
+                    _position = _floorRequested * (_floorHeight + _slabHeight);
+                    _closerFloor = _floorRequested;
+                    _isMoving = false;
+                    _velocity = 0;
+
+                    if (_floorRequests[_floorRequested])
+                    {
+                        _floorRequests[_floorRequested] = false;
+                    }
+
+                    if (_pannelRequests[_floorRequested])
+                    {
+                        _pannelRequests[_floorRequested] = false;
+                    }
+                }
+                else
+                {
+                    if (_isGoingUp)
+                    {
+                        _velocity = _velocity + 0.1 * (4 - _velocity);
+                    }
+                    else
+                    {
+                        _velocity = _velocity - 0.1 * (4 + _velocity);
+                    }
+
+                    _position += _velocity;
+
+                    _closerFloor = (uint)(_position / (_floorHeight + _slabHeight));
+                }
+            }
+            else
+            {
+                if (_isGoingUp)
+                {
+                    for(uint i = _closerFloor; i < _floorsNumber; i++)
+                    {
+                        if (_pannelRequests[i])
+                        {
+                            _floorRequested = i;
+                            _isMoving = true;
+                            goto XX;
+                        }
+                    }
+                    _isGoingUp = false;
+                    XX:;
+                }
+                
+                if (!_isGoingUp)
+                {
+                    for(int i = (int)_closerFloor; i >= 0; i--)
+                    {
+                        if (_pannelRequests[i])
+                        {
+                            _floorRequested = (uint)i;
+                            _isMoving = true;
+                            goto KK;
+                        }
+                    }
+                    _isGoingUp = true;
+                    KK:;
+                }
+
+                if (!_isMoving)
+                {
+                    for(int i = (int)_floorsNumber; i >= 0; i--)
+                    {
+                        if (_floorRequests[i])
+                        {
+                            _floorRequested = (uint)i;
+                            _isMoving = true;
+                            break;
+                        }
+                    }
+
+                    if(_floorRequested > _closerFloor)
+                    {
+                        _isGoingUp = true;
+                    }
+                    else
+                    {
+                        _isGoingUp = false;
+                    }
+                }
             }
         }
 
