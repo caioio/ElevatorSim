@@ -44,6 +44,7 @@ namespace ElevatorSim
          * [ ] parada de emergência
          * [ ] velocidade máxima
          * [ ] sistemas de portas dos andares e do elevador
+         * ==================================================================
          * [ ] modo incêndio (move elevador para o térreo e desliga elevador)
          * [ ] perfil de aceleração e desaceleração
          * [ ] motor do elevador
@@ -90,11 +91,22 @@ namespace ElevatorSim
             get => _isMoving;
         }
 
-        private long GetTimeInMilliseconds()
+        public uint CloserFloor
         {
+            get => _closerFloor;
+        }
+
+        public uint FloorRequested
+        {
+            get => _floorRequested;
+        }
+
+        public long GetTimeInMilliseconds()         // mudar
+        {   
             return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
         }
 
+        /* Função construtora*/
         public ElevatorLogic(uint floorsNumber, double floorHeight, double slabHeight)
         {
             _floorsNumber = floorsNumber;
@@ -134,7 +146,7 @@ namespace ElevatorSim
         public void RunElevatorLogic(long millisecondsTickTime)
         {
 
-            if((GetTimeInMilliseconds() - _timer) < 50)
+            if((GetTimeInMilliseconds() - _timer) < millisecondsTickTime)
             {
                 return;
             }
@@ -145,7 +157,7 @@ namespace ElevatorSim
 
             if (_isMoving)
             {
-                if ((_position < (_floorRequested * (_floorHeight + _slabHeight)+0.1d)) && (_position > (_floorRequested * (_floorHeight + _slabHeight) - 0.1d)))
+                if ((_position < (_floorRequested * (_floorHeight + _slabHeight)+0.01d)) && (_position > (_floorRequested * (_floorHeight + _slabHeight) - 0.01d)))
                 {
                     _position = _floorRequested * (_floorHeight + _slabHeight);
                     _closerFloor = _floorRequested;
@@ -212,7 +224,7 @@ namespace ElevatorSim
 
                 if (!_isMoving)
                 {
-                    for(int i = (int)_floorsNumber; i >= 0; i--)
+                    for(int i = (int)(_floorsNumber - 1); i >= 0; i--)
                     {
                         if (_floorRequests[i])
                         {
