@@ -14,14 +14,15 @@ namespace ElevatorSim
 {
     public partial class Form1 : Form
     {
-        static private ElevatorLogic logic = new ElevatorLogic(5, 3.0d, 0.12d);
         private bool[] btnArray = new bool[5];
         private bool[] lampArray = new bool[5];
-        private BackgroundWorker bw;
         public Form1()
         {
             InitializeComponent();            
         }
+
+        public delegate void FormUpdateEventHandler(Object source, EventArgs args);
+        public event FormUpdateEventHandler FormUpdateEvent;
 
         private void DisplayMode()
         {
@@ -91,23 +92,46 @@ namespace ElevatorSim
             lampArray[4] = true;
         }
         
-        private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            //uint k = uint.Parse(e.UserState as string);
-            //lampArray[k] = false;
-        }
-
         /* Carrega a thread */
         private void Form1_Load(object sender, EventArgs e)
         {
-            bw = new BackgroundWorker();
-            bw.DoWork += (obj, ea) => backgroundWorker1_DoWork(obj, ea);
-            bw.ProgressChanged += (obj, ea) => bw_ProgressChanged(obj, ea);
-            bw.WorkerReportsProgress = true;
-            bw.RunWorkerAsync();
+            LogicProcess process = new LogicProcess();
+
+            process.LogicUpdateEvent += process.OnUpdate;
+            process.LogicUpdateEvent += process.ElevatorLogicRunTask;
+
         }
 
-        private async void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+    }
+
+    public class LogicProcess
+    {
+        public uint closer_floor;
+        public bool is_moving;
+        public double position;
+
+        public LogicProcess()
+        {
+            closer_floor = 0;
+            is_moving = false;
+            position = 0.0d;
+        }
+
+        static private ElevatorLogic logic = new ElevatorLogic(5, 3.0d, 0.12d);
+
+        public delegate void LogicUpdateEventHandler(Object source, EventArgs args);
+
+        public event LogicUpdateEventHandler LogicUpdateEvent;
+
+        private bool[] btnArray = new bool[5];
+
+        public void OnUpdate(Object source, EventArgs e)
+        {
+            closer_floor = logic.CloserFloor;
+            is_moving = logic.IsMoving;
+            position = logic.Position;
+        }
+        public void ElevatorLogicRunTask(object sender, EventArgs e)
         {
             while (true)
             {
@@ -124,19 +148,9 @@ namespace ElevatorSim
                 logic.RunElevatorLogic(30);
                 if (logic.CloserFloor == logic.FloorRequested)
                 {
-                    bw.ReportProgress(0, logic.CloserFloor.ToString());
+                    
                 }
             }
         }
     }
-    /*
-    public partial class InterfaceElevador : Form
-    {
-        public int numeroDoBotao;
-
-        public void mudaCorDoBotao(object sender, EventArgs e)
-        {
-            // ainda será feito
-        }
-    }*/
 }

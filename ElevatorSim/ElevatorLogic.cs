@@ -101,6 +101,11 @@ namespace ElevatorSim
             get => _floorRequested;
         }
 
+        public double Position
+        {
+            get => _position;
+        }
+
         public long GetTimeInMilliseconds()         // mudar
         {   
             return DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;

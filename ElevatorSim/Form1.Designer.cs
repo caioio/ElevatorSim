@@ -38,7 +38,6 @@ namespace ElevatorSim
             this.button3 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tBDebugText = new System.Windows.Forms.TextBox();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.SuspendLayout();
             // 
             // cBMode
@@ -129,10 +128,6 @@ namespace ElevatorSim
             this.tBDebugText.Size = new System.Drawing.Size(243, 20);
             this.tBDebugText.TabIndex = 8;
             // 
-            // backgroundWorker1
-            // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -166,7 +161,6 @@ namespace ElevatorSim
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tBDebugText;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 
