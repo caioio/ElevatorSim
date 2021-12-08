@@ -14,15 +14,14 @@ namespace ElevatorSim
 {
     public partial class Form1 : Form
     {
-        private bool[] btnArray = new bool[5];
-        private bool[] lampArray = new bool[5];
+        VisualEffects vfx;
+        RandomCaller rnd;
+        ElevatorLogic logic;
+        Task blink;
         public Form1()
         {
             InitializeComponent();            
         }
-
-        public delegate void FormUpdateEventHandler(Object source, EventArgs args);
-        public event FormUpdateEventHandler FormUpdateEvent;
 
         private void DisplayMode()
         {
@@ -30,13 +29,33 @@ namespace ElevatorSim
             {
                 tBmodeText.Text = "Modo automático";
                 tBmodeText.BackColor = Color.LimeGreen;
+                rnd.RunRandomCaller();
             }
             else
             {
                 tBmodeText.Text = "Modo manual";
                 tBmodeText.BackColor = Color.Orange;
+                rnd.PauseRandomCaller();
             }
             tBDebugText.Text = "Modo de controle alterado.";
+        }
+
+        private void DebugTextColorChanger(object sender, EventArgs e)
+        {
+            if(tBDebugText.BackColor == Color.LimeGreen)
+            {
+                Invoke((MethodInvoker) delegate() 
+                {
+                    tBDebugText.BackColor = Color.LightBlue;
+                });
+            }
+            else
+            {
+                Invoke((MethodInvoker)delegate ()
+                {
+                    tBDebugText.BackColor = Color.LimeGreen;
+                });
+            }
         }
 
         private void CheckedChangedEvent(object sender, EventArgs e)
@@ -44,113 +63,80 @@ namespace ElevatorSim
             DisplayMode();
         }
 
-        /*private void ElevatorLogicRunTask()
-        {
-            while (true)
-            {
-                for (int i = 0; i < (int)logic.FloorsNumber; i++)
-                {
-                    if (btnArray[i]) // btnArray
-                    {
-                        //bw.ReportProgress(0, String.Format("O botão {0} foi pressionado.", i));
-                        //logic.AddFloorRequest((uint)i);
-                        btnArray[i] = false;
-                        Thread.Sleep(10);
-                    }
-                }
-                //logic.RunElevatorLogic(30);
-            }
-        }*/
 
-        private void button0_Click(object sender, EventArgs e)
+        private void Button0_Click(object sender, EventArgs e)
         {
-            btnArray[0] = true;     /* seta boão */ 
-            lampArray[0] = true;    /* seta lâmpada */
+            button0.BackColor = Color.Yellow;
+            tBDebugText.Text = "Botão 0 clicado.";
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
-            btnArray[1] = true;
-            lampArray[1] = true;
+            tBDebugText.Text = "Botão 1 clicado.";
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Button2_Click(object sender, EventArgs e)
         {
-            btnArray[2] = true;
-            lampArray[2] = true;
+            tBDebugText.Text = "Botão 2 clicado.";
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void Button3_Click(object sender, EventArgs e)
         {
-            btnArray[3] = true;
-            lampArray[3] = true;
+            tBDebugText.Text = "Botão 3 clicado.";
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void Button4_Click(object sender, EventArgs e)
         {
-            btnArray[4] = true;
-            lampArray[4] = true;
+            tBDebugText.Text = "Botão 4 clicado.";
         }
-        
+
         /* Carrega a thread */
         private void Form1_Load(object sender, EventArgs e)
         {
-            LogicProcess process = new LogicProcess();
+            tBDebugText.Text = "Form carregado.";
+            logic = new ElevatorLogic(5, 3.0d, 0.12d);
+            rnd = new RandomCaller(logic, 1000, 20000);
+            blink = new Task(rnd.CallRandomly);
 
-            process.LogicUpdateEvent += process.OnUpdate;
-            process.LogicUpdateEvent += process.ElevatorLogicRunTask;
+            rnd.RandomCallEvent += this.DebugTextColorChanger;
+
+            blink.Start();
+            // iniciar task
+            // iniciar objeto de processo
+            // inscrever eventos
+            // rodar task
 
         }
 
-    }
-
-    public class LogicProcess
-    {
-        public uint closer_floor;
-        public bool is_moving;
-        public double position;
-
-        public LogicProcess()
+        private void Form1_Close(object sender, EventArgs e)
         {
-            closer_floor = 0;
-            is_moving = false;
-            position = 0.0d;
+            //vfx.runEfx = false;
+            rnd.CloseRandomCaller();
+            blink.Wait();
+            blink.Dispose();
         }
-
-        static private ElevatorLogic logic = new ElevatorLogic(5, 3.0d, 0.12d);
-
-        public delegate void LogicUpdateEventHandler(Object source, EventArgs args);
-
-        public event LogicUpdateEventHandler LogicUpdateEvent;
-
-        private bool[] btnArray = new bool[5];
-
-        public void OnUpdate(Object source, EventArgs e)
+        class VisualEffects
         {
-            closer_floor = logic.CloserFloor;
-            is_moving = logic.IsMoving;
-            position = logic.Position;
-        }
-        public void ElevatorLogicRunTask(object sender, EventArgs e)
-        {
-            while (true)
+            public bool runEfx;
+            public delegate void ChangeColorDelegate(object sender, EventArgs e);
+            public event ChangeColorDelegate ChangeColor;
+            public VisualEffects()
             {
-                for (int i = 0; i < (int)logic.FloorsNumber; i++)
+                runEfx = true;
+            }
+            public void DoVisualEffect()
+            {
+                while (runEfx)
                 {
-                    if (btnArray[i]) // btnArray
+                    if (ChangeColor != null)    // alugém está inscrito nesse evento?
                     {
-                        logic.AddPannelRequest((uint)i);
-                        btnArray[i] = false;
-                        Debug.WriteLine("O botão {0} foi pressionado.", i);
-                        Thread.Sleep(10);
+                        ChangeColor(this, EventArgs.Empty); // se sim chama ele
                     }
-                }
-                logic.RunElevatorLogic(30);
-                if (logic.CloserFloor == logic.FloorRequested)
-                {
-                    
+                    Thread.Sleep(500);
                 }
             }
         }
+
     }
+
 }

@@ -148,6 +148,26 @@ namespace ElevatorSim
             }
         }
 
+        public bool HasPannelRequest()
+        {
+            bool ans = false;
+            foreach(bool request in _pannelRequests)
+            {
+                ans = ans || request;
+            }
+            return ans;
+        }
+
+        public bool HasFloorRequest()
+        {
+            bool ans = false;
+            foreach(bool request in _floorRequests)
+            {
+                ans = ans || request;
+            }
+            return ans;
+        }
+
         public void RunElevatorLogic(long millisecondsTickTime)
         {
 
