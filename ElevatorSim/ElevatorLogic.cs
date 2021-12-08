@@ -55,7 +55,7 @@ namespace ElevatorSim
             get => _floorsNumber;
             set
             {
-                if(!Object.Equals(_floorsNumber, default(int)))
+                if (!Object.Equals(_floorsNumber, default(int)))
                 {
                     _floorsNumber = value;
                 }
@@ -79,7 +79,7 @@ namespace ElevatorSim
             get => _slabHeight;
             set
             {
-                if(!Object.Equals(_slabHeight, default(double)))
+                if (!Object.Equals(_slabHeight, default(double)))
                 {
                     _slabHeight = value;
                 }
@@ -104,6 +104,11 @@ namespace ElevatorSim
         public double Position
         {
             get => _position;
+        }
+
+        public bool this[int i]
+        {
+            get { return _pannelRequests[i]; }
         }
 
         public long GetTimeInMilliseconds()         // mudar

@@ -57,6 +57,11 @@ namespace ElevatorSim
             }
         }
 
+        private void ButtonColorChanger(object sender, EventArgs e)
+        {
+
+        }
+
         private void CheckedChangedEvent(object sender, EventArgs e)
         {
             DisplayMode();
