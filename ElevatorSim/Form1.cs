@@ -14,13 +14,12 @@ namespace ElevatorSim
 {
     public partial class Form1 : Form
     {
-        VisualEffects vfx;
         RandomCaller rnd;
         ElevatorLogic logic;
         Task blink;
         public Form1()
         {
-            InitializeComponent();            
+            InitializeComponent();
         }
 
         private void DisplayMode()
@@ -42,12 +41,12 @@ namespace ElevatorSim
 
         private void DebugTextColorChanger(object sender, EventArgs e)
         {
-            if(tBDebugText.BackColor == Color.LimeGreen)
+            if (tBDebugText.BackColor == Color.LimeGreen)
             {
-                Invoke((MethodInvoker) delegate() 
-                {
-                    tBDebugText.BackColor = Color.LightBlue;
-                });
+                Invoke((MethodInvoker)delegate ()
+               {
+                   tBDebugText.BackColor = Color.LightBlue;
+               });
             }
             else
             {
@@ -115,28 +114,5 @@ namespace ElevatorSim
             blink.Wait();
             blink.Dispose();
         }
-        class VisualEffects
-        {
-            public bool runEfx;
-            public delegate void ChangeColorDelegate(object sender, EventArgs e);
-            public event ChangeColorDelegate ChangeColor;
-            public VisualEffects()
-            {
-                runEfx = true;
-            }
-            public void DoVisualEffect()
-            {
-                while (runEfx)
-                {
-                    if (ChangeColor != null)    // alugém está inscrito nesse evento?
-                    {
-                        ChangeColor(this, EventArgs.Empty); // se sim chama ele
-                    }
-                    Thread.Sleep(500);
-                }
-            }
-        }
-
     }
-
 }

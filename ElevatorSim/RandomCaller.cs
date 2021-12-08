@@ -18,6 +18,7 @@ namespace ElevatorSim
         private ElevatorLogic _logic;
         private bool _isAvailable;
         private bool _run;
+
         public delegate void RandomCallerEventHandler(object sender, EventArgs e);
         public event RandomCallerEventHandler RandomCallEvent;
 
