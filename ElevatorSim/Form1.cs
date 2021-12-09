@@ -14,9 +14,14 @@ namespace ElevatorSim
 {
     public partial class Form1 : Form
     {
-        RandomCaller rnd;
-        ElevatorLogic logic;
-        Task blink;
+        private BackProcess bck;
+        private ElevatorLogic logic;
+        private Task backProcTask;
+        private Dictionary<uint, ButtonBase> elevatorButtons = new Dictionary<uint, ButtonBase>();
+
+        public delegate MethodInvoker InvokeLogic();
+
+
         public Form1()
         {
             InitializeComponent();
@@ -28,13 +33,13 @@ namespace ElevatorSim
             {
                 tBmodeText.Text = "Modo automático";
                 tBmodeText.BackColor = Color.LimeGreen;
-                rnd.RunRandomCaller();
+                bck.RunRandomCaller();
             }
             else
             {
                 tBmodeText.Text = "Modo manual";
                 tBmodeText.BackColor = Color.Orange;
-                rnd.PauseRandomCaller();
+                bck.PauseRandomCaller();
             }
             tBDebugText.Text = "Modo de controle alterado.";
         }
@@ -57,6 +62,20 @@ namespace ElevatorSim
             }
         }
 
+        private void FormElevatorLogicRunner(object sender, EventArgs e)
+        {
+            Invoke((MethodInvoker)delegate ()
+            {
+                logic.RunElevatorLogic();
+
+                if (logic.FloorRequested == logic.CloserFloor)
+                {
+                    elevatorButtons[logic.FloorRequested].BackColor = Color.LightGray;
+                }
+            });
+
+        }
+
         private void CheckedChangedEvent(object sender, EventArgs e)
         {
             DisplayMode();
@@ -67,52 +86,62 @@ namespace ElevatorSim
         {
             button0.BackColor = Color.Yellow;
             tBDebugText.Text = "Botão 0 clicado.";
+            logic.AddPannelRequest(0);
         }
 
         private void Button1_Click(object sender, EventArgs e)
         {
+            button1.BackColor = Color.Yellow;
             tBDebugText.Text = "Botão 1 clicado.";
+            logic.AddPannelRequest(1);
         }
 
         private void Button2_Click(object sender, EventArgs e)
         {
+            button2.BackColor = Color.Yellow;
             tBDebugText.Text = "Botão 2 clicado.";
+            logic.AddPannelRequest(2);
         }
 
         private void Button3_Click(object sender, EventArgs e)
         {
+            button3.BackColor = Color.Yellow;
             tBDebugText.Text = "Botão 3 clicado.";
+            logic.AddPannelRequest(3);
         }
 
         private void Button4_Click(object sender, EventArgs e)
         {
+            button4.BackColor = Color.Yellow;
             tBDebugText.Text = "Botão 4 clicado.";
+            logic.AddPannelRequest(4);
         }
 
         /* Carrega a thread */
         private void Form1_Load(object sender, EventArgs e)
         {
+            elevatorButtons.Add(0, button0);
+            elevatorButtons.Add(1, button1);
+            elevatorButtons.Add(2, button2);
+            elevatorButtons.Add(3, button3);
+            elevatorButtons.Add(4, button4);
+
             tBDebugText.Text = "Form carregado.";
             logic = new ElevatorLogic(5, 3.0d, 0.12d);
-            rnd = new RandomCaller(logic, 1000, 20000);
-            blink = new Task(rnd.CallRandomly);
+            bck = new BackProcess(100, 1000, 5000);
+            backProcTask = new Task(bck.CallProc);
 
-            rnd.RandomCallEvent += this.DebugTextColorChanger;
+            bck.RandomCallEvent += this.DebugTextColorChanger;
+            bck.ProcessEvent += this.FormElevatorLogicRunner;
 
-            blink.Start();
-            // iniciar task
-            // iniciar objeto de processo
-            // inscrever eventos
-            // rodar task
-
+            backProcTask.Start();
         }
 
         private void Form1_Close(object sender, EventArgs e)
         {
-            //vfx.runEfx = false;
-            rnd.CloseRandomCaller();
-            blink.Wait();
-            blink.Dispose();
+            bck.CloseBackProcess();
+            backProcTask.Wait();
+            backProcTask.Dispose();
         }
     }
 }

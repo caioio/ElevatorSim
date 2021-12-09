@@ -87,6 +87,8 @@ namespace ElevatorSim
 
         public void CloseBackProcess()
         {
+            _runProc = false;
+            _runRand = false;
             _isAvailable = false;
         }
 
@@ -96,28 +98,22 @@ namespace ElevatorSim
             {
                 _milliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
 
-                if (_runRand)
+                if (_runRand && (RandomCallEvent != null))
                 {
-                    if (RandomCallEvent != null)
+                    if (_milliseconds - _millisecondRandTimer > _randomInterval)
                     {
-                        if (_milliseconds - _millisecondRandTimer > _randomInterval)
-                        {
-                            RandomCallEvent(this, EventArgs.Empty);
-                            _millisecondRandTimer = _milliseconds;
-                            _randomInterval = _millisConstant + (_randObj.Next() % _millisMaxVariance);
-                        }
+                        RandomCallEvent(this, EventArgs.Empty);
+                        _millisecondRandTimer = _milliseconds;
+                        _randomInterval = _millisConstant + (_randObj.Next() % _millisMaxVariance);
                     }
                 }
 
-                if (_runProc)
+                if (_runProc && (ProcessEvent != null))
                 {
-                    if (ProcessEvent != null)
+                    if (_milliseconds - _millisecondTimer > _simMillisInterval)
                     {
-                        if (_milliseconds - _millisecondTimer > _simMillisInterval)
-                        {
-                            ProcessEvent(this, EventArgs.Empty);
-                            _millisecondTimer = _milliseconds;
-                        }
+                        ProcessEvent(this, EventArgs.Empty);
+                        _millisecondTimer = _milliseconds;
                     }
                 }
             }

@@ -28,7 +28,6 @@ namespace ElevatorSim
         private uint _floorRequested;     // andar requerido
         private bool[] _pannelRequests;   // lista de chamadas do painel do elevador (PRIORIDADE)
         private bool[] _floorRequests;    // lista de chamadas de cada andar
-        private long _timer;
 
         /*
          * O elevador prioriza as chamadas do painel, e sempre irá atender primeiro
@@ -168,18 +167,8 @@ namespace ElevatorSim
             return ans;
         }
 
-        public void RunElevatorLogic(long millisecondsTickTime)
+        public void RunElevatorLogic()
         {
-
-            if((GetTimeInMilliseconds() - _timer) < millisecondsTickTime)
-            {
-                return;
-            }
-            else
-            {
-                _timer = GetTimeInMilliseconds();
-            }
-
             if (_isMoving)
             {
                 if ((_position < (_floorRequested * (_floorHeight + _slabHeight)+0.01d)) && (_position > (_floorRequested * (_floorHeight + _slabHeight) - 0.01d)))
