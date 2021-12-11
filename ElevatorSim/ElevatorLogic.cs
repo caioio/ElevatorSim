@@ -28,6 +28,15 @@ namespace ElevatorSim
         private uint _floorRequested;     // andar requerido
         private bool[] _pannelRequests;   // lista de chamadas do painel do elevador (PRIORIDADE)
         private bool[] _floorRequests;    // lista de chamadas de cada andar
+        public enum ElevatorState
+        {
+            GoingUp,
+            GoingDown,
+            Stopped,
+            CheckFloor,
+        }
+
+        private ElevatorState state;
 
         /*
          * O elevador prioriza as chamadas do painel, e sempre irá atender primeiro
@@ -113,12 +122,13 @@ namespace ElevatorSim
         /* Função construtora*/
         public ElevatorLogic(uint floorsNumber, double floorHeight, double slabHeight)
         {
+            state = ElevatorState.Stopped;
             _floorsNumber = floorsNumber;
             _floorHeight = floorHeight;
             _slabHeight = slabHeight;
             _closerFloor = 0;                            // O elevador inicia no Térreo
             _position = 0.0d;
-            _velocity = 0.0d;
+            _velocity = 0.1d;
             _isGoingUp = true;
             _isMoving = false;
             _floorRequests = new bool[floorsNumber];     // inicializa array de chamadas dos pisos
@@ -133,7 +143,7 @@ namespace ElevatorSim
 
         public void AddPannelRequest(uint floor)
         {
-            if(floor <= _floorsNumber)
+            if(floor < _floorsNumber)
             {
                 _pannelRequests[floor] = true;
             }
@@ -141,7 +151,7 @@ namespace ElevatorSim
 
         public void AddFloorRequest(uint floor)
         {
-            if(floor <= _floorsNumber)
+            if(floor < _floorsNumber)
             {
                 _floorRequests[floor] = true;
             }
@@ -167,13 +177,27 @@ namespace ElevatorSim
             return ans;
         }
 
+        public bool HasReachedFloor()
+        {
+            double height = _floorRequested * (_floorHeight + _slabHeight);
+            bool onFloor = (_position <= (height + 0.10d));
+            onFloor = onFloor && (_position >= (height - 0.10d));
+
+            return onFloor;
+        }
+
         public void RunElevatorLogic()
         {
+            if (!HasPannelRequest() && !HasFloorRequest())
+            {
+                _isMoving = false;
+            }
+
             if (_isMoving)
             {
-                if ((_position < (_floorRequested * (_floorHeight + _slabHeight)+0.01d)) && (_position > (_floorRequested * (_floorHeight + _slabHeight) - 0.01d)))
+                if (HasReachedFloor())
                 {
-                    _position = _floorRequested * (_floorHeight + _slabHeight);
+                    //_position = _floorRequested * (_floorHeight + _slabHeight);
                     _closerFloor = _floorRequested;
                     _isMoving = false;
                     _velocity = 0;
@@ -192,11 +216,11 @@ namespace ElevatorSim
                 {
                     if (_isGoingUp)
                     {
-                        _velocity = _velocity + 0.1 * (4 - _velocity);
+                        _velocity = 0.05;
                     }
                     else
                     {
-                        _velocity = _velocity - 0.1 * (4 + _velocity);
+                        _velocity = -0.05;
                     }
 
                     _position += _velocity;
@@ -258,6 +282,78 @@ namespace ElevatorSim
                     }
                 }
             }
+        }
+
+        public void RunElevatorLogicOnce()
+        {
+            switch (state)
+            {
+                case ElevatorState.Stopped:
+                    _isMoving = false;
+                    if(_floorRequested == _closerFloor) // se a chamada for no mesmo andar apaga ela e sai.
+                    {
+                        _pannelRequests[_floorRequested] = false;
+                    }
+
+                    if (HasPannelRequest())
+                    {
+                        for(uint i = 0; i < _floorsNumber; i++)
+                        {
+                            if (_pannelRequests[i])
+                            {
+                                _floorRequested = i;
+                                if (_floorRequested > _closerFloor)
+                                {
+                                    state = ElevatorState.GoingUp;
+                                }
+                                else
+                                {
+                                    state = ElevatorState.GoingDown;
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    break;
+
+                case ElevatorState.GoingUp:
+                    _closerFloor = (uint)(_position / (_floorHeight + _slabHeight));
+                    _position += _velocity;
+                    _isGoingUp = true;
+                    _isMoving = true;
+                    state = ElevatorState.CheckFloor;
+                    break;
+
+                case ElevatorState.GoingDown:
+                    _closerFloor = (uint)(_position / (_floorHeight + _slabHeight));
+                    _position -= _velocity;
+                    _isGoingUp = false;
+                    _isMoving = true;
+                    state = ElevatorState.CheckFloor;
+                    break;
+
+                case ElevatorState.CheckFloor:
+                    if (HasReachedFloor())
+                    {
+                        state = ElevatorState.Stopped;
+                        _pannelRequests[_floorRequested] = false;
+                        _closerFloor = _floorRequested;
+                        break;
+                    }
+
+                    if (_isGoingUp)
+                    {
+                        state = ElevatorState.GoingUp;
+                    }
+                    else
+                    {
+                        state = ElevatorState.GoingDown;
+                    }
+                    break;
+                default:
+                    break;
+            }            
         }
     }
 }

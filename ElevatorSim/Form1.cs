@@ -66,9 +66,14 @@ namespace ElevatorSim
         {
             Invoke((MethodInvoker)delegate ()
             {
-                logic.RunElevatorLogic();
+                logic.RunElevatorLogicOnce();
 
-                if (logic.FloorRequested == logic.CloserFloor)
+                if (logic.IsMoving)
+                {
+                    tBDebugText.Text = "Position: " + logic.Position.ToString();
+                }
+
+                if (logic.HasReachedFloor())
                 {
                     elevatorButtons[logic.FloorRequested].BackColor = Color.LightGray;
                 }
@@ -85,36 +90,36 @@ namespace ElevatorSim
         private void Button0_Click(object sender, EventArgs e)
         {
             button0.BackColor = Color.Yellow;
-            tBDebugText.Text = "Botão 0 clicado.";
             logic.AddPannelRequest(0);
+            tBDebugText.Text = "Floor 0 request: " + logic.HasPannelRequest().ToString();
         }
 
         private void Button1_Click(object sender, EventArgs e)
         {
             button1.BackColor = Color.Yellow;
-            tBDebugText.Text = "Botão 1 clicado.";
             logic.AddPannelRequest(1);
+            tBDebugText.Text = "Floor 1 request: " + logic.HasPannelRequest().ToString();
         }
 
         private void Button2_Click(object sender, EventArgs e)
         {
             button2.BackColor = Color.Yellow;
-            tBDebugText.Text = "Botão 2 clicado.";
             logic.AddPannelRequest(2);
+            tBDebugText.Text = "Floor 2 request: " + logic.HasPannelRequest().ToString();
         }
 
         private void Button3_Click(object sender, EventArgs e)
         {
             button3.BackColor = Color.Yellow;
-            tBDebugText.Text = "Botão 3 clicado.";
             logic.AddPannelRequest(3);
+            tBDebugText.Text = "Floor 3 request: " + logic.HasPannelRequest().ToString();
         }
 
         private void Button4_Click(object sender, EventArgs e)
         {
             button4.BackColor = Color.Yellow;
-            tBDebugText.Text = "Botão 4 clicado.";
             logic.AddPannelRequest(4);
+            tBDebugText.Text = "Floor 4 request: " + logic.HasPannelRequest().ToString();
         }
 
         /* Carrega a thread */
@@ -128,7 +133,7 @@ namespace ElevatorSim
 
             tBDebugText.Text = "Form carregado.";
             logic = new ElevatorLogic(5, 3.0d, 0.12d);
-            bck = new BackProcess(100, 1000, 5000);
+            bck = new BackProcess(50, 1000, 5000);
             backProcTask = new Task(bck.CallProc);
 
             bck.RandomCallEvent += this.DebugTextColorChanger;
