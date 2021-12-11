@@ -17,6 +17,7 @@ namespace ElevatorSim
         private BackProcess bck;
         private ElevatorLogic logic;
         private Task backProcTask;
+        private Random rand;
         private Dictionary<uint, ButtonBase> elevatorButtons = new Dictionary<uint, ButtonBase>();
 
         public delegate MethodInvoker InvokeLogic();
@@ -60,6 +61,16 @@ namespace ElevatorSim
                     tBDebugText.BackColor = Color.LimeGreen;
                 });
             }
+        }
+
+        private void ChamaAndarAleatorio(object sender, EventArgs e)
+        {
+            Invoke((MethodCaller)delegate ()
+            {
+                int r = rand.Next() % 5;
+                logic.AddPannelRequest(r);
+                tBDebugText.Text = "Andar aleatório chamado: " + r.ToString();
+            });
         }
 
         private void FormElevatorLogicRunner(object sender, EventArgs e)
@@ -136,7 +147,7 @@ namespace ElevatorSim
             bck = new BackProcess(50, 1000, 5000);
             backProcTask = new Task(bck.CallProc);
 
-            bck.RandomCallEvent += this.DebugTextColorChanger;
+            bck.RandomCallEvent += this.ChamaAndarAleatorio;
             bck.ProcessEvent += this.FormElevatorLogicRunner;
 
             backProcTask.Start();
