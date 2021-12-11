@@ -65,12 +65,16 @@ namespace ElevatorSim
 
         private void ChamaAndarAleatorio(object sender, EventArgs e)
         {
-            Invoke((MethodCaller)delegate ()
+            Invoke((MethodInvoker)delegate ()
             {
-                int r = rand.Next() % 5;
+                uint r = (uint)rand.Next() % 5;
                 logic.AddPannelRequest(r);
                 tBDebugText.Text = "Andar aleatório chamado: " + r.ToString();
+
+                elevatorButtons[r].BackColor = Color.Yellow;
             });
+
+
         }
 
         private void FormElevatorLogicRunner(object sender, EventArgs e)
@@ -141,6 +145,8 @@ namespace ElevatorSim
             elevatorButtons.Add(2, button2);
             elevatorButtons.Add(3, button3);
             elevatorButtons.Add(4, button4);
+
+            rand = new Random();
 
             tBDebugText.Text = "Form carregado.";
             logic = new ElevatorLogic(5, 3.0d, 0.12d);
