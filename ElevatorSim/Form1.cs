@@ -85,7 +85,7 @@ namespace ElevatorSim
 
                 if (logic.IsMoving)
                 {
-                    tBDebugText.Text = "Position: " + logic.Position.ToString();
+                    tBDebugText.Text = "Position: " + logic.Position.ToString("0.00");
                 }
 
                 if (logic.HasReachedFloor())
